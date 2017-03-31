@@ -1,0 +1,72 @@
+// -*- C++ -*-
+// This file is a part of the IncludeOS unikernel - www.includeos.org
+//
+// Copyright 2017 Oslo and Akershus University College of Applied Sciences
+// and Alfred Bratterud
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef INCLUDEOS_FILESYSTEM_R_HPP
+#define INCLUDEOS_FILESYSTEM_R_HPP
+
+#include <cstdint>
+#include <result>
+#include <unordered_map>
+
+using Filesystem_error = Error_t::Type; //< Filesystem error type
+
+Filesystem_error E_IO      {"E_IO:"};
+Filesystem_error E_MNT     {"E_MNT:"};
+Filesystem_error E_NOENT   {"E_NOENT:"};
+Filesystem_error E_NOTDIR  {"E_NOTDIR:"};
+Filesystem_error E_NOTFILE {"E_NOTFILE:"};
+
+inline Result<std::string> read_file(const char* filename)
+{
+  if (filename == nullptr)
+  {
+    return Error_t{E_NOENT + "Invalid filename"};
+  }
+
+  return std::string{"IncludeOS Unikernel"};
+}
+
+/**
+ * This is a mapping of codes to filesystem error types
+ */
+enum class Filesystem_error_code : uint8_t {
+  E_IO,
+  E_MNT,
+  E_NOENT,
+  E_NOTDIR,
+  E_NOTFILE,
+  E_INVALID
+}; //< enum class Filesystem_error_code
+
+Filesystem_error_code fs_err_type_code(const std::experimental::string_view type_string) noexcept
+{
+  const static std::unordered_map<std::experimental::string_view, Filesystem_error_code> code_map
+  {
+    {E_IO,      Filesystem_error_code::E_IO},
+    {E_MNT,     Filesystem_error_code::E_MNT},
+    {E_NOENT,   Filesystem_error_code::E_NOENT},
+    {E_NOTDIR,  Filesystem_error_code::E_NOTDIR},
+    {E_NOTFILE, Filesystem_error_code::E_NOTFILE}
+  };
+
+  const auto it = code_map.find(type_string);
+
+  return (it not_eq code_map.cend()) ? it->second : Filesystem_error_code::E_INVALID;
+}
+
+#endif //< INCLUDEOS_FILESYSTEM_R_HPP
